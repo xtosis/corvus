@@ -1,132 +1,128 @@
-###################################################################
+###############################################################
 ### ERROR[10]: WARNING: duplicate entries attempted
-###################################################################
+###############################################################
  D[002] |/server/main.js
  E[000] |import '/imports/startup/both';
  I[009] |
------------------------------------------------------
+---------------------------------------------------------------
  D[238] |/imports/ui/templates/layout/navigation/navigation.js
- E[006] |import { timers } from '/lib/const';
+ E[005] |import { timers } from '/lib/const';
  I[009] |
------------------------------------------------------
-###################################################################
+---------------------------------------------------------------
+###############################################################
 ### ERROR[ 1]: new type of syntax
-###################################################################
- D[002] |/server/main.js
- E[001] |NOT FOUND!
- I[010] |
------------------------------------------------------
+###############################################################
  D[162] |/lib/utils.js
- E[002] |import slugify from 'slugify';
+ E[001] |import slugify from 'slugify';
  I[004] |
------------------------------------------------------
+---------------------------------------------------------------
  D[172] |/imports/utils/test-utils/faker-schema/index.js
+ E[002] |import jsf from 'json-schema-faker';
+ I[001] |
+---------------------------------------------------------------
+ D[178] |/imports/utils/test-utils/faker-schema/Tag.js
  E[003] |import jsf from 'json-schema-faker';
  I[001] |
------------------------------------------------------
- D[178] |/imports/utils/test-utils/faker-schema/Tag.js
- E[004] |import jsf from 'json-schema-faker';
- I[001] |
------------------------------------------------------
+---------------------------------------------------------------
  D[183] |/imports/ui/templates/widgets/warning/warning.js
- E[005] |NOT FOUND!
+ E[004] |NOT FOUND!
  I[003] |
------------------------------------------------------
+---------------------------------------------------------------
  D[247] |/imports/ui/templates/components/identity/signup/signup.js
+ E[007] |NOT FOUND!
+ I[003] |
+---------------------------------------------------------------
+ D[250] |/imports/ui/templates/components/identity/login/socialMediaLogin.js
  E[008] |NOT FOUND!
  I[003] |
------------------------------------------------------
- D[250] |/imports/ui/templates/components/identity/login/socialMediaLogin.js
+---------------------------------------------------------------
+ D[262] |/imports/ui/templates/components/identity/login/forgotPassword.js
  E[009] |NOT FOUND!
  I[003] |
------------------------------------------------------
- D[262] |/imports/ui/templates/components/identity/login/forgotPassword.js
+---------------------------------------------------------------
+ D[264] |/imports/ui/templates/components/identity/login/emailLogin.js
  E[010] |NOT FOUND!
  I[003] |
------------------------------------------------------
- D[264] |/imports/ui/templates/components/identity/login/emailLogin.js
- E[011] |NOT FOUND!
- I[003] |
------------------------------------------------------
+---------------------------------------------------------------
  D[359] |/imports/startup/server/raven.js
- E[013] |import RavenLogger from 'meteor/flowkey:raven';
+ E[012] |import RavenLogger from 'meteor/flowkey:raven';
  I[001] |
------------------------------------------------------
+---------------------------------------------------------------
  D[361] |/imports/startup/server/index.js
- E[014] |important security settings.
+ E[013] |important security settings.
         |// import './security.js';
  I[002] |
------------------------------------------------------
+---------------------------------------------------------------
  D[367] |/imports/startup/client/subscribe.js
- E[015] |import initReactFastclick from 'react-fastclick';
+ E[014] |import initReactFastclick from 'react-fastclick';
  I[002] |
------------------------------------------------------
+---------------------------------------------------------------
  D[368] |/imports/startup/client/raven.js
- E[016] |import RavenLogger from 'meteor/flowkey:raven';
+ E[015] |import RavenLogger from 'meteor/flowkey:raven';
  I[001] |
------------------------------------------------------
+---------------------------------------------------------------
  D[374] |/imports/startup/both/modules/metamask.js
- E[017] |import Web3 from 'web3';
+ E[016] |import Web3 from 'web3';
  I[003] |
------------------------------------------------------
+---------------------------------------------------------------
  D[376] |/imports/startup/both/modules/blockstack.js
- E[018] |import blockstack from 'blockstack';
+ E[017] |import blockstack from 'blockstack';
  I[006] |
------------------------------------------------------
+---------------------------------------------------------------
  D[379] |/imports/startup/both/methods/insert/file.js
- E[019] |import somewhere
+ E[018] |import somewhere
         |Meteor.methods({
         |  storeUrlInDatabase(url) {
         |    check(url, String);
  I[005] |
------------------------------------------------------
+---------------------------------------------------------------
  D[401] |/imports/api/blockchain/modules/web3Util.js
- E[020] |import Web3 from 'web3';
+ E[019] |import Web3 from 'web3';
  I[001] |
------------------------------------------------------
+---------------------------------------------------------------
  D[411] |/features/step_definitions/tags-steps.js
- E[021] |imports/api/contracts/methods ? @santisiri
+ E[020] |imports/api/contracts/methods ? @santisiri
         |    const tag = getServer().execute((title) => {
         |      repository = require('/imports/api/tags/Tags').Tags;
  I[002] |
------------------------------------------------------
+---------------------------------------------------------------
  D[420] |/features/step_definitions/support/models/ideas.js
+ E[021] |EMPTY
+ I[002] |
+---------------------------------------------------------------
+ D[423] |/features/step_definitions/support/fixtures/user-fixtures.js
  E[022] |EMPTY
  I[002] |
------------------------------------------------------
- D[423] |/features/step_definitions/support/fixtures/user-fixtures.js
+---------------------------------------------------------------
+ D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
  E[023] |EMPTY
  I[002] |
------------------------------------------------------
- D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
- E[024] |EMPTY
- I[002] |
------------------------------------------------------
+---------------------------------------------------------------
  D[427] |/features/step_definitions/setup-steps.js
- E[025] |imports won't work but you can still access them in server.execute()
+ E[024] |imports won't work but you can still access them in server.execute()
         |// import { Meteor } from 'meteor/meteor';
  I[001] |
------------------------------------------------------
+---------------------------------------------------------------
  D[430] |/features/step_definitions/ideas-steps.js
+ E[025] |EMPTY
+ I[002] |
+---------------------------------------------------------------
+ D[433] |/features/step_definitions/comments-steps.js
  E[026] |EMPTY
  I[002] |
------------------------------------------------------
- D[433] |/features/step_definitions/comments-steps.js
- E[027] |EMPTY
- I[002] |
------------------------------------------------------
-###################################################################
+---------------------------------------------------------------
+###############################################################
 ### ERROR[ 9]: possible typo or file does not exist
-###################################################################
+###############################################################
  D[240] |/imports/ui/templates/layout/menu/touchmenu.js
- E[007] |import './touchmenu.html';
+ E[006] |import './touchmenu.html';
  I[003] |
  */imports/ui/templates/layout/menu/touchmenu.html
------------------------------------------------------
-###################################################################
+---------------------------------------------------------------
+###############################################################
 ### ERROR[-1]: file too short
-###################################################################
+###############################################################
  D[356] |/imports/startup/server/server-render.js
- E[012] |NOT FOUND!
+ E[011] |NOT FOUND!
  I[000] |
------------------------------------------------------
+---------------------------------------------------------------
