@@ -31,9 +31,9 @@ DROP_EXT = ['.md',
 DESCRIPTION = {-1: 'file too short',
                0: 'zero length',
                1: 'new type of syntax',
-               2: 'no ending } found in file',
+               2: 'no \' from \' found after \'import \'',
                3: '; found in function text',
-               4: 'no \' from \' found after \'import {\'',
+               4: 'DEPRECATED',
                5: 'no qoutes found after \' from \'',
                6: 'illegal characters in directory',
                7: 'unknown case',
@@ -67,6 +67,6 @@ if False:
     drawLine()
 
 # exporting errors
-exportErrors(ROOT, dirs, errorLog, DESCRIPTION)
+exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=False)
 print 'C0RVUS| exported error logs'
 drawLine()

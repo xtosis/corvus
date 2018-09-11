@@ -306,13 +306,15 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                         idir = idir + 1  # $$$$$$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
 
             # function name ----------------------------------------- [SECTION]
-            elif file[:2] == ' {':
-                file = file[2:]
-                _find = file.find('}')
+            elif file[0] == ' ':
+                file = file[1:]
+                _find = file.find(' from ')
 
                 if _find != -1:  # else error 2
                     text = file[:_find].replace(' ', '')
-                    file = file[_find + 1:]
+                    text = text.replace('{', '')
+                    text = text.replace('}', '')
+                    file = file[_find + 6:]
 
                     if text.find(';') == -1:  # else error 3
                         while(text.find(',') != -1):  # removing commas
@@ -335,49 +337,48 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
 
                         # import directory with from method --------- [SECTION]
-                        if file[:6] == ' from ':  # else error 4
-                            file = file[6:]
-                            if file[0] == "\'" and file.find("\'", 1) > -1:
-                                file = file[1:]
-                                _find = file.find("\'")
-                            elif file[0] == '\"' and file.find('\"', 1) > -1:
-                                file = file[1:]
-                                _find = file.find('\"')
-                            else:
-                                text = ' from ' + file[:file.find(';') + 1]
-                                log = logError(5, ids[i], c, text)
-                                log.name = len(errorLog)
-                                errorLog = errorLog.append(log)
-                                break
-                                # no qoutes found after ' from ' !!! 5 [UPDATE]
-
-                            text = directoryRoutine(file, _find, directory,
-                                                    ids[i], c)
-
-                            if isinstance(text, type(pd.Series())):
-                                text.name = len(errorLog)
-                                errorLog = errorLog.append(text)
-                                break  # zero length !!!!!!!!!!!!!!! 0 [UPDATE]
-                                # illegal characters in directory !! 6 [UPDATE]
-                            else:
-                                temp = saveData('DIR', text, CORVUS, ids, i, c)
-                                if isinstance(temp, type(pd.Series())):
-                                    temp.name = len(errorLog)
-                                    errorLog = errorLog.append(temp)
-                                    break  # unknown case !!!!!!!!!! 7 [UPDATE]
-                                    # duplicate entry !!!!!!!!!!!!! 10 [UPDATE]
-                # typo in directory string or file does not exist !! 9 [UPDATE]
-                                else:
-                                    file = file[_find + 1:]
-                                    CORVUS = temp.copy()
-                                    # new directory based dependecies  [UPDATE]
-                                    fdir = fdir + 1  # $$$$$$$$$$$$ [DIAGNOSIS]
-
+                        #if file[:6] == ' from ':  # else error 4
+                        if file[0] == "\'" and file.find("\'", 1) > -1:
+                            file = file[1:]
+                            _find = file.find("\'")
+                        elif file[0] == '\"' and file.find('\"', 1) > -1:
+                            file = file[1:]
+                            _find = file.find('\"')
                         else:
-                            log = logError(4, ids[i], c, file)
-                            errorLog = errorLog.append(log, ignore_index=True)
+                            text = ' from ' + file[:file.find(';') + 1]
+                            log = logError(5, ids[i], c, text)
+                            log.name = len(errorLog)
+                            errorLog = errorLog.append(log)
                             break
-                            # no ' from ' found after 'import {' !!! 4 [UPDATE]
+                            # no qoutes found after ' from ' !!! 5 [UPDATE]
+
+                        text = directoryRoutine(file, _find, directory,
+                                                ids[i], c)
+
+                        if isinstance(text, type(pd.Series())):
+                            text.name = len(errorLog)
+                            errorLog = errorLog.append(text)
+                            break  # zero length !!!!!!!!!!!!!!! 0 [UPDATE]
+                            # illegal characters in directory !! 6 [UPDATE]
+                        else:
+                            temp = saveData('DIR', text, CORVUS, ids, i, c)
+                            if isinstance(temp, type(pd.Series())):
+                                temp.name = len(errorLog)
+                                errorLog = errorLog.append(temp)
+                                break  # unknown case !!!!!!!!!! 7 [UPDATE]
+                                # duplicate entry !!!!!!!!!!!!! 10 [UPDATE]
+                # typo in directory string or file does not exist !! 9 [UPDATE]
+                            else:
+                                file = file[_find + 1:]
+                                CORVUS = temp.copy()
+                                # new directory based dependecies  [UPDATE]
+                                fdir = fdir + 1  # $$$$$$$$$$$$ [DIAGNOSIS]
+
+                        #else:
+                        #    log = logError(4, ids[i], c, file)
+                        #    errorLog = errorLog.append(log, ignore_index=True)
+                        #    break
+                        #    # no ' from ' found after 'import {' !!! 4 [UPDATE]
                     else:
                         log = logError(3, ids[i], c, text)
                         errorLog = errorLog.append(log, ignore_index=True)
@@ -385,7 +386,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                 else:
                     log = logError(2, ids[i], c, file)
                     errorLog = errorLog.append(log, ignore_index=True)
-                    break  # no ending } found in file !!!!!!!!!!!!! 2 [UPDATE]
+                    break  # no ' from ' found in file !!!!!!!!!!!!! 2 [UPDATE]
             else:
                 _find = file.find(';')
                 text = 'import' + file[:_find + 1]
@@ -476,7 +477,7 @@ def getLine(ID, LOG, DIRS, ROOT):
     return 'NOT FOUND!'
 
 
-def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[]):
+def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[], ISSUES=True):
     file = open('logs/errors.txt', 'w')
     for _type in LOG.E.unique():
         if _type not in IGNORE:
@@ -499,8 +500,9 @@ def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[]):
                 file.write('--------------\n')
     file.close()
 
-    with open('logs/errors.txt', 'r') as file:
-        error_log = file.read()
+    if ISSUES:
+        with open('logs/errors.txt', 'r') as file:
+            error_log = file.read()
 
-    with open('logs/issues.txt', 'w') as file:
-        file.write(error_log)
+        with open('logs/issues.txt', 'w') as file:
+            file.write(error_log)
