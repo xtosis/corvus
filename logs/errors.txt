@@ -1,21 +1,22 @@
 ###############################################################
-### ERROR[10]: WARNING: duplicate entries attempted
+### ERROR[ 9]: WARNING: duplicate entries attempted
 ###############################################################
  D[002] |/server/main.js
  E[000] |import '/imports/startup/both';
  I[009] |
+ */imports/startup/both
 ---------------------------------------------------------------
  D[238] |/imports/ui/templates/layout/navigation/navigation.js
  E[001] |import { timers } from '/lib/const';
  I[009] |
+ */lib/const
 ---------------------------------------------------------------
 ###############################################################
-### ERROR[ 9]: possible typo or file does not exist
+### ERROR[ 8]: possible typo or file does not exist
 ###############################################################
  D[240] |/imports/ui/templates/layout/menu/touchmenu.js
  E[002] |import './touchmenu.html';
  I[003] |
- */imports/ui/templates/layout/menu/touchmenu.html
 ---------------------------------------------------------------
 ###############################################################
 ### ERROR[-1]: file too short

@@ -33,13 +33,12 @@ DESCRIPTION = {-1: 'file too short',
                1: 'new type of syntax',
                2: 'no \' from \' found after \'import \'',
                3: '; found in function text',
-               4: 'DEPRECATED',
-               5: 'no qoutes found after \' from \'',
-               6: 'illegal characters in directory',
-               7: 'unknown case',
-               8: 'no ending quote for directory text',
-               9: 'possible typo or file does not exist',
-               10: 'WARNING: duplicate entries attempted'}
+               4: 'no qoutes found after \' from \'',
+               5: 'illegal characters in directory',
+               6: 'unknown case',
+               7: 'no ending quote for directory text',
+               8: 'possible typo or file does not exist',
+               9: 'WARNING: duplicate entries attempted'}
 
 # generating main corvus dataframe
 df = generateCorvus(ROOT, FIX, DROP_EXT, VERBOSE)

@@ -32,3 +32,8 @@ AFTER:
           [-1]   1 file too short
           [02]   1 no ' from ' found after 'import '
           [09]   1 possible typo or file does not exist
+
+Note:
+* Error types of greater than 3 have decreased values as error 4
+  has been deprecated
+* Applies to all commits after 4fd9b7d
