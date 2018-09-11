@@ -5,10 +5,11 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 10000)
 pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.colheader_justify', 'left')
 
 # inputs
 ROOT = '../sovereign'
-VERBOSE = 2
+VERBOSE = 0
 FIX = {'.codeclimate.yml': '.yml',
        '.i18n.json': '.json',
        '.resize.js': '.js',
@@ -50,14 +51,18 @@ drawLine()
 
 # print search report
 STATS = showReport(df, dirs, errorLog, report, DESCRIPTION,
-                   PARTS=[True, True, True])
+                   PARTS=[False, True, True])
+
+print 'C0RVUS| files with dependencies only:'
+temp = STATS['only_dep'].iloc[:, :2].sort_values(['EXT', 'DIR'])
+for i in temp.index:
+    print '   {:03}| {} {}'.format(i,
+                                   temp.loc[i, 'EXT'],
+                                   temp.loc[i, 'DIR'])
+drawLine()
+
 if False:
-    print 'C0RVUS| files with dependencies only:'
-    drawLine()
-    print STATS['only_dep'].iloc[:, :2].sort_values(['EXT', 'DIR'])
-    drawLine()
     print 'C0RVUS| files with no dependencies and no calls:'
-    drawLine()
     print STATS['neither'].iloc[:, :2].sort_values(['EXT', 'DIR'])
     drawLine()
 
