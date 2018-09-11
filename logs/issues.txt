@@ -1,39 +1,59 @@
 ###############################################################
 ### ERROR[ 1]: new type of syntax
 ###############################################################
- D[162] |/lib/utils.js
- E[001] |import slugify from 'slugify';
- I[004] |
----------------------------------------------------------------
+ D[361] |/imports/startup/server/index.js
+ E[004] |important security settings.
+        |// import './security.js';
+ I[002] |
+--------------------------------------------------------------- remove comments before search
+ D[411] |/features/step_definitions/tags-steps.js
+ E[006] |imports/api/contracts/methods ? @santisiri
+        |    const tag = getServer().execute((title) => {
+        |      repository = require('/imports/api/tags/Tags').Tags;
+ I[002] |
+--------------------------------------------------------------- change to find('import ')
+ D[427] |/features/step_definitions/setup-steps.js
+ E[010] |imports won't work but you can still access them in server.execute()
+        |// import { Meteor } from 'meteor/meteor';
+ I[001] |
+--------------------------------------------------------------- remove comments before search
+###############################################################
+### ERROR[ 2]: no ' from ' found after 'import '
+###############################################################
+ D[379] |/imports/startup/both/methods/insert/file.js
+ E[005] |import somewhere
+        |Meteor.methods({
+        |  storeUrlInDatabase(url) {
+        |    check(url, String);
+ I[005] |
+--------------------------------------------------------------- remove comments before search
 
 BEFORE:
 
         > overall stats:
           successful 'import' method:   177
-          successful  'from'  method:   707
-          successful function import:   708
-
-        > errors:
-          [01]  23 new type of syntax
-          [10]   2 WARNING: duplicate entries attempted
-          [-1]   1 file too short
-          [09]   1 possible typo or file does not exist
-
-AFTER:
-
-		> overall stats:
-          successful 'import' method:   177
           successful  'from'  method:   735
           successful function import:   736
 
+          function maximum streak:       16
+
+          files with dependencies:      163
+          files with only dependencies:  36
+          files with no dependencies:   325
+
+          files with calls:             258
+          files with only calls:        131
+          files with no calls:          230
+
+          files with both:              127
+          files with only one:          167
+          files with neither:           194
+
+          files total:                  488
+
         > errors:
           [01]   8 new type of syntax
-          [10]   2 WARNING: duplicate entries attempted
+          [09]   2 WARNING: duplicate entries attempted
           [-1]   1 file too short
           [02]   1 no ' from ' found after 'import '
-          [09]   1 possible typo or file does not exist
-
-Note:
-* Error types of greater than 3 have decreased values as error 4
-  has been deprecated
-* Applies to all commits after 4fd9b7d
+          [08]   1 possible typo or file does not exist
