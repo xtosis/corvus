@@ -66,7 +66,7 @@ if False:
     drawLine()
 
 # exporting errors
-exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=False)
+exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=True)
 print 'C0RVUS| exported error logs'
 drawLine()
 

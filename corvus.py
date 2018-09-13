@@ -227,17 +227,6 @@ def saveData(COL, DATA, DF, ID, i, C):
             return DF
             # new directory based dependecies ######################## [UPDATE]
     else:
-        '''
-        if DF.loc[ID[i], COL] == 'None':
-            DF.loc[ID[i], COL] = [DATA]
-        elif DATA not in DF.loc[ID[i], COL]:
-            DF.loc[ID[i], COL].append(DATA)
-        else:
-            return logError(9, ID[i], C, DATA)
-            # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
-        return DF
-        # saving all other types of data ############################# [UPDATE]
-        '''
         if DF.loc[ID[i], COL] == 'None':
             DF.loc[ID[i], COL] = [DATA]
         else:
@@ -251,7 +240,6 @@ def saveData(COL, DATA, DF, ID, i, C):
                 DF.loc[ID[i], COL].append(DATA)
         return DF
         # saving all other types of data ############################# [UPDATE]
-        # '''
 
 
 def decodeID(ID, DIRS):
@@ -279,7 +267,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
             search = True
 
         if CLEAN and search:  # Cleaning
-            # '''
+
             sin_com, start = 0, 0
             while file.find('//', start) > -1:
                 start = file.find('//', start)
@@ -297,7 +285,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                 sin_com = sin_com + 1
                 CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
                 # saving single line comment ######################### [UPDATE]
-            # '''
+
             blk_com, start = 0, 0
             while file.find('/*', start) > -1:
                 start = file.find('/*', start)
@@ -320,15 +308,6 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                 blk_com = blk_com + 1
                 CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
                 # block comment ###################################### [UPDATE]
-            # '''
-
-            '''
-            name = directory.replace('/', '_')
-            name = name.replace('.js', '.txt')
-            name = 'logs/files/{}'.format(name[1:])
-            with open(name, 'w+') as sample:
-                sample.write(file)
-            # '''
 
             file = file.replace('\n', '')
             file = file.replace('\t', '')
