@@ -1,6 +1,7 @@
 from os import walk
 from os.path import join
 import pandas as pd
+pd.set_option('display.max_colwidth', 200)
 
 
 def drawLine():
@@ -226,6 +227,7 @@ def saveData(COL, DATA, DF, ID, i, C):
             return DF
             # new directory based dependecies ######################## [UPDATE]
     else:
+        '''
         if DF.loc[ID[i], COL] == 'None':
             DF.loc[ID[i], COL] = [DATA]
         elif DATA not in DF.loc[ID[i], COL]:
@@ -235,6 +237,21 @@ def saveData(COL, DATA, DF, ID, i, C):
             # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
         return DF
         # saving all other types of data ############################# [UPDATE]
+        '''
+        if DF.loc[ID[i], COL] == 'None':
+            DF.loc[ID[i], COL] = [DATA]
+        else:
+            if COL == 'FUNC':
+                if DATA not in DF.loc[ID[i], COL]:
+                    DF.loc[ID[i], COL].append(DATA)
+                else:
+                    return logError(9, ID[i], C, DATA)
+                    # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
+            else:
+                DF.loc[ID[i], COL].append(DATA)
+        return DF
+        # saving all other types of data ############################# [UPDATE]
+        # '''
 
 
 def decodeID(ID, DIRS):
@@ -261,7 +278,58 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
         else:
             search = True
 
-        if CLEAN:  # Cleaning
+        if CLEAN and search:  # Cleaning
+            # '''
+            sin_com, start = 0, 0
+            while file.find('//', start) > -1:
+                start = file.find('//', start)
+                end = file.find('\n', start)
+                comment = file[start:end].replace('\t', '')
+                comment = comment.replace('  ', ' ')
+                while comment.find('///') > -1:
+                    comment = comment.replace('///', '//')
+                put = '//[{:05}]'.format(sin_com)
+                if start < 2:
+                    file = put + file[end:]
+                else:
+                    file = file[:start - 1] + put + file[end:]
+                start = start + 2
+                sin_com = sin_com + 1
+                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
+                # saving single line comment ######################### [UPDATE]
+            # '''
+            blk_com, start = 0, 0
+            while file.find('/*', start) > -1:
+                start = file.find('/*', start)
+                end = file.find('*/', start)
+                if file.find('*/', end + 2) > -1:
+                    _find = file.find('*/', end + 2)
+                    temp = file[end + 2: _find]
+                    if temp.find('/*') == -1:
+                        end = _find
+                comment = file[start + 2:end].replace('\t', '')
+                comment = comment.replace('  ', ' ')
+                while comment.find('///') > -1:
+                    comment = comment.replace('///', '//')
+                put = '/*[{:05}]'.format(blk_com)
+                if start < 2:
+                    file = put + file[end:]
+                else:
+                    file = file[:start - 1] + put + file[end:]
+                start = start + 2
+                blk_com = blk_com + 1
+                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
+                # block comment ###################################### [UPDATE]
+            # '''
+
+            '''
+            name = directory.replace('/', '_')
+            name = name.replace('.js', '.txt')
+            name = 'logs/files/{}'.format(name[1:])
+            with open(name, 'w+') as sample:
+                sample.write(file)
+            # '''
+
             file = file.replace('\n', '')
             file = file.replace('\t', '')
             file = file.replace('  ', ' ')

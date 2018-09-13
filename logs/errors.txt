@@ -28,49 +28,25 @@
 ###############################################################
 ### ERROR[ 1]: new type of syntax
 ###############################################################
- D[361] |/imports/startup/server/index.js
- E[004] |important security settings.
-        |// import './security.js';
- I[002] |
----------------------------------------------------------------
  D[411] |/features/step_definitions/tags-steps.js
- E[006] |imports/api/contracts/methods ? @santisiri
+ E[004] |imports/api/contracts/methods ? @santisiri
         |    const tag = getServer().execute((title) => {
         |      repository = require('/imports/api/tags/Tags').Tags;
  I[002] |
 ---------------------------------------------------------------
  D[420] |/features/step_definitions/support/models/ideas.js
- E[007] |EMPTY
- I[002] |
----------------------------------------------------------------
- D[423] |/features/step_definitions/support/fixtures/user-fixtures.js
- E[008] |EMPTY
+ E[005] |EMPTY
  I[002] |
 ---------------------------------------------------------------
  D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
- E[009] |EMPTY
+ E[006] |EMPTY
  I[002] |
 ---------------------------------------------------------------
- D[427] |/features/step_definitions/setup-steps.js
- E[010] |imports won't work but you can still access them in server.execute()
-        |// import { Meteor } from 'meteor/meteor';
- I[001] |
----------------------------------------------------------------
  D[430] |/features/step_definitions/ideas-steps.js
- E[011] |EMPTY
+ E[007] |EMPTY
  I[002] |
 ---------------------------------------------------------------
  D[433] |/features/step_definitions/comments-steps.js
- E[012] |EMPTY
+ E[008] |EMPTY
  I[002] |
----------------------------------------------------------------
-###############################################################
-### ERROR[ 2]: no ' from ' found after 'import '
-###############################################################
- D[379] |/imports/startup/both/methods/insert/file.js
- E[005] |import somewhere
-        |Meteor.methods({
-        |  storeUrlInDatabase(url) {
-        |    check(url, String);
- I[005] |
 ---------------------------------------------------------------

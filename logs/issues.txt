@@ -57,3 +57,32 @@ BEFORE:
           [-1]   1 file too short
           [02]   1 no ' from ' found after 'import '
           [08]   1 possible typo or file does not exist
+
+AFTER:
+
+        > overall stats:
+          successful 'import' method:   183 +6
+          successful  'from'  method:   736 +1
+          successful function import:   737 +1
+
+          function maximum streak:       16
+
+          files with dependencies:      164 +1
+          files with only dependencies:  37 +1
+          files with no dependencies:   324 -1
+
+          files with calls:             258 
+          files with only calls:        131
+          files with no calls:          230
+
+          files with both:              127
+          files with only one:          168 +1
+          files with neither:           193 -1
+
+          files total:                  488
+
+        > errors:
+          [01]   5 new type of syntax
+          [09]   2 WARNING: duplicate entries attempted
+          [-1]   1 file too short
+          [08]   1 possible typo or file does not exist

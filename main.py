@@ -69,3 +69,5 @@ if False:
 exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=False)
 print 'C0RVUS| exported error logs'
 drawLine()
+
+# df.to_csv('./backup/main1.csv')
