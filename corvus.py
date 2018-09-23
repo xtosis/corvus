@@ -309,6 +309,12 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                 CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
                 # block comment ###################################### [UPDATE]
 
+            name = directory.replace('/', '_')
+            name = name.replace('.js', '.txt')
+            name = 'backup/no_com/{}'.format(name[1:])
+            with open(name, 'w+') as sample:
+                sample.write(file)
+
             file = file.replace('\n', '')
             file = file.replace('\t', '')
             file = file.replace('  ', ' ')
@@ -428,8 +434,8 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     errorLog = errorLog.append(log, ignore_index=True)
                     break  # no ' from ' found after 'import ' !!!!! 2 [UPDATE]
             else:
-                _find = file.find(';')
-                text = 'import' + file[:_find + 1]
+                end = file.find(';')
+                text = 'import' + file[:end + 1]
                 log = logError(1, ids[i], c, text)
                 errorLog = errorLog.append(log, ignore_index=True)
                 break  # New type of syntax with import detected !!! 1 [UPDATE]
@@ -500,21 +506,25 @@ def getLine(ID, LOG, DIRS, ROOT):
     directory = decodeID(case.ID, DIRS)
     with open(ROOT + directory, 'r') as some_file:
         file = some_file.read()
-    c = 0
-    start = 0
-    while(file.find('import', start) > -1):
-        c = c + 1
-        start = file.find('import')
-        if c == case.INS:
-            text = file[start:file.find(';') + 1]
-            if text == '':
-                return 'EMPTY'
-            elif text == '\n':
-                return 'NEW LINE'
-            else:
-                return text
-        file = file[file.find(';') + 1:]
-    return 'NOT FOUND!'
+
+    if case.TEXT == 'TOO SHORT':
+        return file
+    else:
+        c = 0
+        start = 0
+        while(file.find('import', start) > -1):
+            c = c + 1
+            start = file.find('import')
+            if c == case.INS:
+                text = file[start:file.find(';', start) + 1]
+                if text == '':
+                    return 'EMPTY'
+                elif text == '\n':
+                    return 'NEW LINE'
+                else:
+                    return text
+            file = file[file.find(';') + 1:]
+        return 'NOT FOUND!'
 
 
 def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[], ISSUES=True):

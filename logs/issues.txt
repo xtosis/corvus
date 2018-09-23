@@ -1,31 +1,4 @@
 ###############################################################
-### ERROR[ 9]: WARNING: duplicate entries attempted
-###############################################################
- D[002] |/server/main.js
- E[000] |import '/imports/startup/both';
- I[009] |
- */imports/startup/both
----------------------------------------------------------------
- D[238] |/imports/ui/templates/layout/navigation/navigation.js
- E[001] |import { timers } from '/lib/const';
- I[009] |
- */lib/const
----------------------------------------------------------------
-###############################################################
-### ERROR[ 8]: possible typo or file does not exist
-###############################################################
- D[240] |/imports/ui/templates/layout/menu/touchmenu.js
- E[002] |import './touchmenu.html';
- I[003] |
----------------------------------------------------------------
-###############################################################
-### ERROR[-1]: file too short
-###############################################################
- D[356] |/imports/startup/server/server-render.js
- E[003] |NOT FOUND!
- I[000] |
----------------------------------------------------------------
-###############################################################
 ### ERROR[ 1]: new type of syntax
 ###############################################################
  D[411] |/features/step_definitions/tags-steps.js
@@ -33,20 +6,49 @@
         |    const tag = getServer().execute((title) => {
         |      repository = require('/imports/api/tags/Tags').Tags;
  I[002] |
----------------------------------------------------------------
- D[420] |/features/step_definitions/support/models/ideas.js
- E[005] |EMPTY
+--------------------------------------------------------------- Must add 'require' to search
+  D[420] |/features/step_definitions/support/models/ideas.js
+ E[005] |imports/api/contracts/Contracts').Contracts.find(query).fetch();
  I[002] |
----------------------------------------------------------------
+--------------------------------------------------------------- Must add 'require' to search
  D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
- E[006] |EMPTY
+ E[006] |imports/api/collectives/Collectives').Collectives;
  I[002] |
----------------------------------------------------------------
+--------------------------------------------------------------- Must add 'require' to search
  D[430] |/features/step_definitions/ideas-steps.js
- E[007] |EMPTY
+ E[007] |imports/api/contracts/Contracts').Contracts;
  I[002] |
----------------------------------------------------------------
+--------------------------------------------------------------- Must add 'require' to search
  D[433] |/features/step_definitions/comments-steps.js
- E[008] |EMPTY
+ E[008] |imports/api/contracts/Contracts').Contracts.find({'events.content': title}).fetch();
  I[002] |
----------------------------------------------------------------
+--------------------------------------------------------------- Must add 'require' to search
+
+BEFORE:
+
+        > overall stats:
+          successful 'import' method:   183
+          successful  'from'  method:   736
+          successful function import:   737
+
+          function maximum streak:       16
+
+          files with dependencies:      164
+          files with only dependencies:  37
+          files with no dependencies:   324
+
+          files with calls:             258
+          files with only calls:        131
+          files with no calls:          230
+
+          files with both:              127
+          files with only one:          168
+          files with neither:           193
+
+          files total:                  488
+-------------------------------------------------------------------
+        > errors:
+          [01]   5 new type of syntax
+          [09]   2 WARNING: duplicate entries attempted
+          [-1]   1 file too short
+          [08]   1 possible typo or file does not exist

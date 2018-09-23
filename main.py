@@ -52,13 +52,14 @@ drawLine()
 STATS = showReport(df, dirs, errorLog, report, DESCRIPTION,
                    PARTS=[False, True, True])
 
-print 'C0RVUS| files with dependencies only:'
-temp = STATS['only_dep'].iloc[:, :2].sort_values(['EXT', 'DIR'])
-for i in temp.index:
-    print '   {:03}| {} {}'.format(i,
-                                   temp.loc[i, 'EXT'],
-                                   temp.loc[i, 'DIR'])
-drawLine()
+if False:
+    print 'C0RVUS| files with dependencies only:'
+    temp = STATS['only_dep'].iloc[:, :2].sort_values(['EXT', 'DIR'])
+    for i in temp.index:
+        print '   {:03}| {} {}'.format(i,
+                                       temp.loc[i, 'EXT'],
+                                       temp.loc[i, 'DIR'])
+    drawLine()
 
 if False:
     print 'C0RVUS| files with no dependencies and no calls:'
@@ -66,7 +67,7 @@ if False:
     drawLine()
 
 # exporting errors
-exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=True)
+exportErrors(ROOT, dirs, errorLog, DESCRIPTION, ISSUES=False)
 print 'C0RVUS| exported error logs'
 drawLine()
 

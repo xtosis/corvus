@@ -22,7 +22,7 @@
 ### ERROR[-1]: file too short
 ###############################################################
  D[356] |/imports/startup/server/server-render.js
- E[003] |NOT FOUND!
+ E[003] |
  I[000] |
 ---------------------------------------------------------------
 ###############################################################
@@ -35,18 +35,18 @@
  I[002] |
 ---------------------------------------------------------------
  D[420] |/features/step_definitions/support/models/ideas.js
- E[005] |EMPTY
+ E[005] |imports/api/contracts/Contracts').Contracts.find(query).fetch();
  I[002] |
 ---------------------------------------------------------------
  D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
- E[006] |EMPTY
+ E[006] |imports/api/collectives/Collectives').Collectives;
  I[002] |
 ---------------------------------------------------------------
  D[430] |/features/step_definitions/ideas-steps.js
- E[007] |EMPTY
+ E[007] |imports/api/contracts/Contracts').Contracts;
  I[002] |
 ---------------------------------------------------------------
  D[433] |/features/step_definitions/comments-steps.js
- E[008] |EMPTY
+ E[008] |imports/api/contracts/Contracts').Contracts.find({'events.content': title}).fetch();
  I[002] |
 ---------------------------------------------------------------
