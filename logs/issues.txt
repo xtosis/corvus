@@ -7,7 +7,7 @@
         |      repository = require('/imports/api/tags/Tags').Tags;
  I[002] |
 --------------------------------------------------------------- Must add 'require' to search
-  D[420] |/features/step_definitions/support/models/ideas.js
+ D[420] |/features/step_definitions/support/models/ideas.js
  E[005] |imports/api/contracts/Contracts').Contracts.find(query).fetch();
  I[002] |
 --------------------------------------------------------------- Must add 'require' to search
@@ -23,32 +23,41 @@
  E[008] |imports/api/contracts/Contracts').Contracts.find({'events.content': title}).fetch();
  I[002] |
 --------------------------------------------------------------- Must add 'require' to search
+###############################################################
+### require cases
+###############################################################
+        > /imports/ui/templates/components/decision/balance/balance.js
+          require('numeral');
+                   numeral
+------------------------------------------------------------------- no func
+        > /features/step_definitions/tags-steps.js
+          require('/imports/api/tags/Tags').Tags;                        no dot
+                   /imports/api/tags/Tags
+          require('/imports/api/tags/Tags').Tags.findOne({text: title}); dot and till end dot
+                   /imports/api/tags/Tags
+-------------------------------------------------------------------
+        > /features/step_definitions/support/utils.js
+          require('/lib/utils').convertToSlug(str);                      no dot and till (
+                   /lib/utils
+          require('words-to-numbers').wordsToNumbers(thing);             no dot and till (
+                   words-to-numbers
+          require('util').inspect(thing);                                no dot and till (
+                   util
+------------------------------------------------------------------- 
+        > /features/step_definitions/browser-steps.js
+          require('escape-string-regexp')(text), "g")) || []).length;
+                   escape-string-regexp
+------------------------------------------------------------------- no func
 
 BEFORE:
-
-        > overall stats:
-          successful 'import' method:   183
-          successful  'from'  method:   736
-          successful function import:   737
-
-          function maximum streak:       16
-
-          files with dependencies:      164
-          files with only dependencies:  37
-          files with no dependencies:   324
-
-          files with calls:             258
-          files with only calls:        131
-          files with no calls:          230
-
-          files with both:              127
-          files with only one:          168
-          files with neither:           193
-
-          files total:                  488
--------------------------------------------------------------------
         > errors:
           [01]   5 new type of syntax
+          [09]   2 WARNING: duplicate entries attempted
+          [-1]   1 file too short
+          [08]   1 possible typo or file does not exist
+
+AFTER:
+        > errors:
           [09]   2 WARNING: duplicate entries attempted
           [-1]   1 file too short
           [08]   1 possible typo or file does not exist

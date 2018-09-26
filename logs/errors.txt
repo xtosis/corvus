@@ -22,31 +22,6 @@
 ### ERROR[-1]: file too short
 ###############################################################
  D[356] |/imports/startup/server/server-render.js
- E[003] |
+ E[003] |EMPTY
  I[000] |
----------------------------------------------------------------
-###############################################################
-### ERROR[ 1]: new type of syntax
-###############################################################
- D[411] |/features/step_definitions/tags-steps.js
- E[004] |imports/api/contracts/methods ? @santisiri
-        |    const tag = getServer().execute((title) => {
-        |      repository = require('/imports/api/tags/Tags').Tags;
- I[002] |
----------------------------------------------------------------
- D[420] |/features/step_definitions/support/models/ideas.js
- E[005] |imports/api/contracts/Contracts').Contracts.find(query).fetch();
- I[002] |
----------------------------------------------------------------
- D[424] |/features/step_definitions/support/fixtures/common-fixtures.js
- E[006] |imports/api/collectives/Collectives').Collectives;
- I[002] |
----------------------------------------------------------------
- D[430] |/features/step_definitions/ideas-steps.js
- E[007] |imports/api/contracts/Contracts').Contracts;
- I[002] |
----------------------------------------------------------------
- D[433] |/features/step_definitions/comments-steps.js
- E[008] |imports/api/contracts/Contracts').Contracts.find({'events.content': title}).fetch();
- I[002] |
 ---------------------------------------------------------------

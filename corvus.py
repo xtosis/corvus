@@ -174,7 +174,7 @@ def directoryRoutine(TEXT, END, CURRENT_DIR, ID, C):
             return text  # implies cloud based import
 
 
-def saveData(COL, DATA, DF, ID, i, C):
+def saveData(COL, DATA, DF, ID, i, C, mode='all'):
     error7 = False
     if COL == 'DIR':
         dep_id = []
@@ -204,7 +204,12 @@ def saveData(COL, DATA, DF, ID, i, C):
             # unknown case !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
         elif len(dep_id) == 0:
             if (DATA[0] != '/') and (DATA.find('.') == -1):
-                data = ['cloud', DATA, 'None', [ID[i]], 'None', 'None', 'None']
+                if mode == 'cond':
+                    data = ['cloud', DATA, 'None', [ID[i]],
+                            'None', 'None', 'None']
+                else:
+                    data = ['cloud', DATA, 'None', ['*{}'.format(ID[i])],
+                            'None', 'None', 'None']
                 new_dir = pd.Series(data, index=DF.columns.values)
                 return DF.append(new_dir, ignore_index=True)
                 # new cloud based dependacy ########################## [UPDATE]
@@ -214,25 +219,45 @@ def saveData(COL, DATA, DF, ID, i, C):
         else:
             for dep in dep_id:
                 if DF.loc[ID[i], 'DEP'] == 'None':
-                    DF.loc[ID[i], 'DEP'] = [dep]
+                    if mode == 'cond':
+                        DF.loc[ID[i], 'DEP'] = ['*{}'.format(dep)]
+                    else:
+                        DF.loc[ID[i], 'DEP'] = [dep]
                 elif dep not in DF.loc[ID[i], 'DEP']:
-                    DF.loc[ID[i], 'DEP'].append(dep)
+                    if mode == 'cond':
+                        DF.loc[ID[i], 'DEP'].append('*{}'.format(dep))
+                    else:
+                        DF.loc[ID[i], 'DEP'].append(dep)
                 else:
                     return logError(9, ID[i], C, DATA)
                     # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
                 if DF.loc[dep, 'CALL'] == 'None':
-                    DF.loc[dep, 'CALL'] = [ID[i]]
+                    if mode == 'cond':
+                        DF.loc[dep, 'CALL'] = ['*{}'.format(ID[i])]
+                    else:
+                        DF.loc[dep, 'CALL'] = [ID[i]]
                 else:
-                    DF.loc[dep, 'CALL'].append(ID[i])
+                    if mode == 'cond':
+                        DF.loc[dep, 'CALL'].append('*{}'.format(ID[i]))
+                    else:
+                        DF.loc[dep, 'CALL'].append(ID[i])
             return DF
             # new directory based dependecies ######################## [UPDATE]
     else:
         if DF.loc[ID[i], COL] == 'None':
-            DF.loc[ID[i], COL] = [DATA]
+            if mode == 'cond':
+                DF.loc[ID[i], COL] = ['*{}'.format(DATA)]
+            else:
+                DF.loc[ID[i], COL] = [DATA]
         else:
             if COL == 'FUNC':
+                # !!! going to have a problem here for multiple functions
+                # !!! that are called by the require method
                 if DATA not in DF.loc[ID[i], COL]:
-                    DF.loc[ID[i], COL].append(DATA)
+                    if mode == 'cond':
+                        DF.loc[ID[i], COL].append('*{}'.format(DATA))
+                    else:
+                        DF.loc[ID[i], COL].append(DATA)
                 else:
                     return logError(9, ID[i], C, DATA)
                     # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
@@ -250,16 +275,16 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
     ids = CORVUS[CORVUS['EXT'] == '.js'].index.values.astype(int)
     directories = CORVUS[CORVUS['EXT'] == '.js'].DIR.values
     errorLog = pd.DataFrame(columns=['E', 'ID', 'INS', 'TEXT'])
-    idir, fdir, func, streak = 0, 0, 0, 0
+    idir, fdir, func, ireq, freq, streak = 0, 0, 0, 0, 0, 0
 
     for i, directory in enumerate(directories):
         # importing the text from file
         with open(ROOT + directory, 'r') as js_file:
-            file = js_file.read()
+            backup = js_file.read()
 
-        c = 0  # ith instance of import that program broke at
+        c = 0  # ith instance of an import or require that program broke at
 
-        if len(file) < MIN_CHARS:
+        if len(backup) < MIN_CHARS:
             log = logError(-1, ids[i], c, 'TOO SHORT')
             errorLog = errorLog.append(log, ignore_index=True)
             search = False  # too short !!!!!!!!!!!!!!!!!!!!!!!!!!! -1 [UPDATE]
@@ -269,41 +294,41 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
         if CLEAN and search:  # Cleaning
 
             sin_com, start = 0, 0
-            while file.find('//', start) > -1:
-                start = file.find('//', start)
-                end = file.find('\n', start)
-                comment = file[start:end].replace('\t', '')
+            while backup.find('//', start) > -1:
+                start = backup.find('//', start)
+                end = backup.find('\n', start)
+                comment = backup[start:end].replace('\t', '')
                 comment = comment.replace('  ', ' ')
                 while comment.find('///') > -1:
                     comment = comment.replace('///', '//')
                 put = '//[{:05}]'.format(sin_com)
                 if start < 2:
-                    file = put + file[end:]
+                    backup = put + backup[end:]
                 else:
-                    file = file[:start - 1] + put + file[end:]
+                    backup = backup[:start - 1] + put + backup[end:]
                 start = start + 2
                 sin_com = sin_com + 1
                 CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
                 # saving single line comment ######################### [UPDATE]
 
             blk_com, start = 0, 0
-            while file.find('/*', start) > -1:
-                start = file.find('/*', start)
-                end = file.find('*/', start)
-                if file.find('*/', end + 2) > -1:
-                    _find = file.find('*/', end + 2)
-                    temp = file[end + 2: _find]
+            while backup.find('/*', start) > -1:
+                start = backup.find('/*', start)
+                end = backup.find('*/', start)
+                if backup.find('*/', end + 2) > -1:
+                    _find = backup.find('*/', end + 2)
+                    temp = backup[end + 2: _find]
                     if temp.find('/*') == -1:
                         end = _find
-                comment = file[start + 2:end].replace('\t', '')
+                comment = backup[start + 2:end].replace('\t', '')
                 comment = comment.replace('  ', ' ')
                 while comment.find('///') > -1:
                     comment = comment.replace('///', '//')
                 put = '/*[{:05}]'.format(blk_com)
                 if start < 2:
-                    file = put + file[end:]
+                    backup = put + backup[end:]
                 else:
-                    file = file[:start - 1] + put + file[end:]
+                    backup = backup[:start - 1] + put + backup[end:]
                 start = start + 2
                 blk_com = blk_com + 1
                 CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
@@ -313,20 +338,25 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
             name = name.replace('.js', '.txt')
             name = 'backup/no_com/{}'.format(name[1:])
             with open(name, 'w+') as sample:
-                sample.write(file)
+                sample.write(backup)
 
-            file = file.replace('\n', '')
-            file = file.replace('\t', '')
-            file = file.replace('  ', ' ')
-            file = file.replace('///', '//')
+            backup = backup.replace('\n', '')
+            backup = backup.replace('\t', '')
+            backup = backup.replace('  ', ' ')
+            backup = backup.replace('///', '//')
 
-        while((file.find('import') != -1) and (search)):
-            f_name = []  # stores function name
+        # =========================== I M P O R T =============================
+        file = backup.replace('require(\'/import', '')
+        while(search and (file.find('import') != -1)):
             c = c + 1
-            _find = file.find('import')
-            file = file[_find + 6:]
+            case = file[file.find('import'):]
+            case = case[:case.find(';') + 1]
 
             # direct import directory ------------------------------- [SECTION]
+            _find = file.find('import')  # !!! shorten
+            file = file[_find + 6:]
+            f_name = []  # stores function name
+
             if file[:2] in (" \'", ' \"'):
                 if (file[:2] == " \'") and (file.find("\'", 2) > -1):
                     file = file[2:]
@@ -426,28 +456,95 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                                 # new directory based dependecies #### [UPDATE]
                                 fdir = fdir + 1  # $$$$$$$$$$$$$$$$ [DIAGNOSIS]
                     else:
-                        log = logError(3, ids[i], c, text)
+                        # log = logError(3, ids[i], c, text)
+                        log = logError(3, ids[i], c, case)
                         errorLog = errorLog.append(log, ignore_index=True)
                         break  # ; found in functions text !!!!!!!!! 3 [UPDATE]
                 else:
-                    log = logError(2, ids[i], c, file)
+                    # log = logError(2, ids[i], c, file)
+                    log = logError(2, ids[i], c, case)
                     errorLog = errorLog.append(log, ignore_index=True)
                     break  # no ' from ' found after 'import ' !!!!! 2 [UPDATE]
             else:
-                end = file.find(';')
-                text = 'import' + file[:end + 1]
-                log = logError(1, ids[i], c, text)
+                # end = file.find(';')
+                # text = 'import' + file[:end + 1]
+                log = logError(1, ids[i], c, case)
                 errorLog = errorLog.append(log, ignore_index=True)
                 break  # New type of syntax with import detected !!! 1 [UPDATE]
 
+        # ========================== R E Q U I R E ============================
+        c, file = 0, backup
+        while(search and (file.find('require(\'') != -1)):
+            c = c + 1
+            case = file[file.find('require(\''):]
+            case = case[:case.find(';') + 1].replace('\n', '\n\t       |')
+
+            # require import directory ------------------------------ [SECTION]
+            file = file[file.find('require(\'') + 9:]
+            _find = file.find('\')')
+
+            temp = directoryRoutine(file, _find, directory, ids[i], c)
+
+            if isinstance(temp, type(pd.Series())):
+                errorLog = errorLog.append(temp, ingore_index=True)
+                break  # zero length !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0 [UPDATE]
+                # illegal characters in directory !!!!!!!!!!!!!!!!!! 5 [UPDATE]
+            else:
+                temp = saveData('DIR', temp, CORVUS, ids, i, c, mode='cond')
+                if isinstance(temp, type(pd.Series())):
+                    errorLog = errorLog.append(temp, ignore_index=True)
+                    break  # unknown case !!!!!!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
+                    # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
+                # typo in directory string or file does not exist !! 8 [UPDATE]
+                else:
+                    # CORVUS = temp.copy()
+                    ireq = ireq + 1
+                    # new directory based dependecy ################## [UPDATE]
+
+            # require import function ------------------------------- [SECTION]
+            text = file[_find:file.find(';')]
+            f_name = []
+
+            if len(text) > 2:
+                # print '> {}'.format(text)
+                text = text[2:]
+                # print '    {}'.format(text)
+                if text[0] == '.':
+                    text = text[1:]
+                    if text.find('.') != -1:
+                        text = text[:text.find('.')]
+                    elif text.find('(') != -1:
+                        text = text[:text.find('(')]
+                    # print '     {}'.format(text)
+
+                    f_name = f_name + [text]
+                    temp = saveData('FUNC', f_name, CORVUS, ids, i, c,
+                                    mode='cond')
+
+                    if isinstance(temp, type(pd.Series())):
+                        errorLog = errorLog.append(temp, ignore_index=True)
+                        break  # duplicate entry !!!!!!!!!!!!!!!!!!! 9 [UPDATE]
+                    else:
+                        # CORVUS = temp.copy()
+                        freq = freq + 1
+                        # new function call detected ################# [UPDATE]
+                else:
+                    print '\tD[{:03}] |{}'.format(ids[i], directory)
+                    print '\tI[{:03}] |{}'.format(c, case)
+                    drawLine()
+            else:
+                pass  # !!! func not detected with import
+
+    print '\t> dircs', ireq
+    print '\t> funcs', freq
+    drawLine()
     report = [idir, fdir, func, streak]
     dirs = CORVUS.DIR.values
     dirs = pd.Series(range(len(dirs)), index=dirs)
     return CORVUS, dirs, errorLog, report
 
 
-def showReport(CORVUS, DIRS, LOG, REPORT, DESCRIPTION,
-               PARTS=[False, True, True]):
+def showReport(CORVUS, DIRS, LOG, REPORT, DESC, PARTS=[False, True, True]):
     no_dep = CORVUS[CORVUS['DEP'] == 'None']
     no_call = CORVUS[CORVUS['CALL'] == 'None']
     neither = no_dep[no_dep['CALL'] == 'None']
@@ -495,7 +592,7 @@ def showReport(CORVUS, DIRS, LOG, REPORT, DESCRIPTION,
         print '\t> errors:'
         for i, n in enumerate(LOG.E.value_counts()):
             _id = LOG.E.value_counts().index[i]
-            print '\t  [{:02}] {:3} {}'.format(_id, n, DESCRIPTION[_id])
+            print '\t  [{:02}] {:3} {}'.format(_id, n, DESC[_id])
         drawLine()
 
     return stats
@@ -508,13 +605,25 @@ def getLine(ID, LOG, DIRS, ROOT):
         file = some_file.read()
 
     if case.TEXT == 'TOO SHORT':
-        return file
+        if file == '':
+            return 'EMPTY'
+        else:
+            return file
     else:
-        c = 0
-        start = 0
-        while(file.find('import', start) > -1):
+        c, start, pre = 0, 0, 0
+
+        if file.find(';') != -1:
+            pre = file.find(';') + 1
+            if file[pre] == '\n':
+                pre = pre + 1
+
+        while(file.find('import', start) != -1):  # !!! include require cases
             c = c + 1
             start = file.find('import')
+
+            while (file[start - 1] != ';') and (start > 0):
+                start = start - 1
+
             if c == case.INS:
                 text = file[start:file.find(';', start) + 1]
                 if text == '':
@@ -539,8 +648,12 @@ def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[], ISSUES=True):
             file.write('##########\n')
             for ID in temp.index:
                 _id = temp.ID[ID]
-                line = getLine(ID, LOG, DIRS, ROOT).replace('\n',
-                                                            '\n        |')
+
+                line = getLine(ID, LOG, DIRS, ROOT).replace('\n\n', '\n')
+                if line[0] == '\n':
+                    line = line[1:]
+                line = line.replace('\n', '\n        |')
+
                 file.write(' D[{:03}] |{}\n'.format(_id, decodeID(_id, DIRS)))
                 file.write(' E[{:03}] |{}\n'.format(ID, line))
                 file.write(' I[{:03}] |\n'.format(temp.INS[ID]))
