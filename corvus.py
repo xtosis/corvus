@@ -132,20 +132,22 @@ def logError(LEVEL, ID, C, STR):
     return pd.Series([LEVEL, ID, C, STR], index=['E', 'ID', 'INS', 'TEXT'])
 
 
-def directoryRoutine(TEXT, END, CURRENT_DIR, ID, C):
+def directoryRoutine(TEXT, END, CURRENT_DIR, ID, C, CASE):
     text = TEXT[:END]
     error = False
-    for char in ('{', '}', '[', ']', '(', ')', ';', '\n', '\t'):
+
+    for char in ('{', '}', '[', ']', '(', ')', ';', '~', '!', '@', '#', '%',
+                 '^', '&', '*', '+', '?', '>', '<', '|', '`', '\n', '\t'):
         if text.find(char) > -1:
             error = True
             break
 
     if error:
-        return logError(5, ID, C, text)
+        return logError(5, ID, C, CASE)
         # illegal characters in directory !!!!!!!!!!!!!!!!!!!!!!!!!! 5 [UPDATE]
     else:
         if len(text) == 0:
-            return logError(0, ID, C, 'ZERO LENGTH')
+            return logError(0, ID, C, CASE)
             # zero length !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0 [UPDATE]
 
         elif text[0] == '/':
@@ -174,32 +176,33 @@ def directoryRoutine(TEXT, END, CURRENT_DIR, ID, C):
             return text  # implies cloud based import
 
 
-def saveData(COL, DATA, DF, ID, i, C, mode='all'):
-    error7 = False
+def saveData(COL, DATA, DF, ID, i, C, CASE, mode='all'):
+    error6 = False
     if COL == 'DIR':
         dep_id = []
         for n, sample in enumerate(DF.DIR.values):
             if sample.find(DATA) == 0:
                 if DATA == sample:
-                    error7 = False
+                    error6 = False
                     dep_id = [n]
                     break
                 elif DATA + '.js' == sample:
-                    error7 = False
+                    error6 = False
                     dep_id = [n]
                     break
                 elif DATA[-1] == '/':
-                    error7 = False
+                    error6 = False
                     dep_id = dep_id + [n]
-                elif (DATA.find('.') == -1) and (sample.find('.js') > -1):
-                    error7 = False
+                elif (DATA.find('.') == -1) and (sample.find('.js') != -1):
+                    error6 = False
                     dep_id = dep_id + [n]
                 else:
-                    error7 = True
+                    error6 = True
                     dep_id = dep_id + [n]
-        if error7:
+        if error6:
             for match in dep_id:
                 DATA = '{}\n  {}'.format(DATA, DF.loc[match, 'DIR'])
+            DATA = [1, CASE, DATA]
             return logError(6, ID[i], C, DATA)
             # unknown case !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
         elif len(dep_id) == 0:
@@ -214,35 +217,122 @@ def saveData(COL, DATA, DF, ID, i, C, mode='all'):
                 return DF.append(new_dir, ignore_index=True)
                 # new cloud based dependacy ########################## [UPDATE]
             else:
-                return logError(8, ID[i], C, DATA)
+                return logError(8, ID[i], C, CASE)
                 # typo in directory string or file does not exist !! 8 [UPDATE]
         else:
-            for dep in dep_id:
-                if DF.loc[ID[i], 'DEP'] == 'None':
-                    if mode == 'cond':
-                        DF.loc[ID[i], 'DEP'] = ['*{}'.format(dep)]
+            '''
+            Duplicate Case 1 stupid
+                conditional dependencies, i.e. require() method, is stupid if
+                the directory or cloud dependency is already called with the
+                import method
+
+            Duplicate Case 2 stupid
+                if an entire directory containing modules A, B, C is imported
+                first and then importing a specific function (using import or
+                require()) is also a stupid thing to do
+
+            Duplicate Case 3 logical
+                if a specific directory is conditionally imported again and
+                again under specific conditions, i.e. require() method only,
+                that makes sense however it makes no sense to include it again
+                and again in the dependecies
+
+            Conclusion:
+                It does not make sense to store any kind of duplicates for both
+                dependecies and calls since we (at least me) are only
+                interested in data that would affect the graph drawn later on
+                from the dependencies to calls. If we are to decide that we
+                want to know under what conditions the call is made, then yeah
+                it makes sense to inlcude  Duplicate Case 3 but the other two
+                are just bad coding practice
+            '''
+            deps_preexisting = DF.loc[ID[i], 'DEP']
+            deps_dups = list(set(deps_preexisting).intersection(dep_id))
+
+            if len(deps_dups) == 0:
+                for dep in dep_id:
+                    if DF.loc[ID[i], 'DEP'] == 'None':
+                        if mode == 'cond':
+                            DF.loc[ID[i], 'DEP'] = ['*{}'.format(dep)]
+                        else:
+                            DF.loc[ID[i], 'DEP'] = [dep]
+
+                    # !!! might be useless
+                    elif (dep not in DF.loc[ID[i], 'DEP'] and
+                          '*{}'.format(dep) not in DF.loc[ID[i], 'DEP']):
+                        # !!! if useless just else and save it
+                        if mode == 'cond':
+                            DF.loc[ID[i], 'DEP'].append('*{}'.format(dep))
+                        else:
+                            DF.loc[ID[i], 'DEP'].append(dep)
+
+                    # !!! might be useless
                     else:
-                        DF.loc[ID[i], 'DEP'] = [dep]
-                elif dep not in DF.loc[ID[i], 'DEP']:
-                    if mode == 'cond':
-                        DF.loc[ID[i], 'DEP'].append('*{}'.format(dep))
-                    else:
-                        DF.loc[ID[i], 'DEP'].append(dep)
+                        DATA = [2, CASE, DATA]
+                        return logError(6, ID[i], C, DATA)
+                        # unknown case !!!!!!!!!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
+                    # !!!
+
+                    # !!! might be useless
+                    call_dups = []
+                    if DF.loc[dep, 'CALL'] != 'None':
+                        if (ID[i] in DF.loc[dep, 'CALL'] or
+                           '*{}'.format(ID[i]) in DF.loc[dep, 'CALL']):
+                            call_dups = call_dups.append(dep)
+                    # !!!
+
+                if len(call_dups) == 0:  # !!! might be useless
+                    for dep in dep_id:
+                        if DF.loc[dep, 'CALL'] == 'None':
+                            if mode == 'cond':
+                                DF.loc[dep, 'CALL'] = ['*{}'.format(ID[i])]
+                            else:
+                                DF.loc[dep, 'CALL'] = [ID[i]]
+                        else:
+                            if mode == 'cond':
+                                DF.loc[dep, 'CALL'].append('*{}'.format(ID[i]))
+                            else:
+                                DF.loc[dep, 'CALL'].append(ID[i])
+
+                # !!! might be useless
                 else:
-                    return logError(9, ID[i], C, DATA)
+                    for i, dup in call_dups:
+                        if mode == 'cond':
+                            call_dups[i] = '*{}'.format(DF.loc[dup, 'DIR'])
+                        else:
+                            call_dups[i] = DF.loc[dup, 'DIR']
+                    duplicates = ['CAL', CASE, call_dups]
+                    return logError(9, ID[i], C, duplicates)
                     # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
-                if DF.loc[dep, 'CALL'] == 'None':
+                # !!!
+
+                return DF
+                # new directory based dependecies #################### [UPDATE]
+            else:
+                if len(deps_dups) == 1:
+                    dup = deps_dups[0]
                     if mode == 'cond':
-                        DF.loc[dep, 'CALL'] = ['*{}'.format(ID[i])]
+                        deps_dups[0] = '*{}'.format(DF.loc[dup, 'DIR'])
                     else:
-                        DF.loc[dep, 'CALL'] = [ID[i]]
+                        deps_dups[0] = DF.loc[dup, 'DIR']
                 else:
-                    if mode == 'cond':
-                        DF.loc[dep, 'CALL'].append('*{}'.format(ID[i]))
-                    else:
-                        DF.loc[dep, 'CALL'].append(ID[i])
-            return DF
-            # new directory based dependecies ######################## [UPDATE]
+                    for i, dup in deps_dups:
+                        if mode == 'cond':
+                            deps_dups[i] = '*{}'.format(DF.loc[dup, 'DIR'])
+                        else:
+                            deps_dups[i] = DF.loc[dup, 'DIR']
+
+                # !!! might be useless
+                duplicates = ['DEP', CASE, deps_dups]
+                return logError(9, ID[i], C, duplicates)
+                # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
+                # !!!
+
+                ''' if useless change to this and update exportErrors
+                return logError(9, ID[i], C, deps_dups)
+                # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
+                '''
+
     else:
         if DF.loc[ID[i], COL] == 'None':
             if mode == 'cond':
@@ -253,12 +343,14 @@ def saveData(COL, DATA, DF, ID, i, C, mode='all'):
             if COL == 'FUNC':
                 # !!! going to have a problem here for multiple functions
                 # !!! that are called by the require method
-                if DATA not in DF.loc[ID[i], COL]:
+                if (DATA not in DF.loc[ID[i], COL] and
+                   '*{}'.format(DATA) not in DF.loc[ID[i], COL]):
                     if mode == 'cond':
                         DF.loc[ID[i], COL].append('*{}'.format(DATA))
                     else:
                         DF.loc[ID[i], COL].append(DATA)
                 else:
+                    # !!! Fix this like other error 9s
                     return logError(9, ID[i], C, DATA)
                     # duplicate entry !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 9 [UPDATE]
             else:
@@ -275,7 +367,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
     ids = CORVUS[CORVUS['EXT'] == '.js'].index.values.astype(int)
     directories = CORVUS[CORVUS['EXT'] == '.js'].DIR.values
     errorLog = pd.DataFrame(columns=['E', 'ID', 'INS', 'TEXT'])
-    idir, fdir, func, ireq, freq, streak = 0, 0, 0, 0, 0, 0
+    aimp, cimp, afrm, cfrm, afun, cfun, streak = 0, 0, 0, 0, 0, 0, 0
 
     for i, directory in enumerate(directories):
         # importing the text from file
@@ -308,7 +400,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     backup = backup[:start - 1] + put + backup[end:]
                 start = start + 2
                 sin_com = sin_com + 1
-                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
+                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c, ' ')
                 # saving single line comment ######################### [UPDATE]
 
             blk_com, start = 0, 0
@@ -331,7 +423,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     backup = backup[:start - 1] + put + backup[end:]
                 start = start + 2
                 blk_com = blk_com + 1
-                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c)
+                CORVUS = saveData('DESC', comment, CORVUS, ids, i, c, ' ')
                 # block comment ###################################### [UPDATE]
 
             name = directory.replace('/', '_')
@@ -365,18 +457,19 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     file = file[2:]
                     _find = file.find('\"')
                 else:
-                    log = logError(7, ids[i], c, file)
+                    log = logError(7, ids[i], c, case)
                     errorLog = errorLog.append(log, ignore_index=True)
                     break  # no ending quot!!!!!!!!!!!!!!!!!!!!!!!!! 7 [UPDATE]
 
-                text = directoryRoutine(file, _find, directory, ids[i], c)
+                text = directoryRoutine(file, _find, directory, ids[i], c,
+                                        case)
 
                 if isinstance(text, type(pd.Series())):
                     errorLog = errorLog.append(text, ingore_index=True)
                     break  # zero length !!!!!!!!!!!!!!!!!!!!!!!!!!! 0 [UPDATE]
                     # illegal characters in directory !!!!!!!!!!!!!! 5 [UPDATE]
                 else:
-                    temp = saveData('DIR', text, CORVUS, ids, i, c)
+                    temp = saveData('DIR', text, CORVUS, ids, i, c, case)
                     if isinstance(temp, type(pd.Series())):
                         errorLog = errorLog.append(temp, ignore_index=True)
                         break  # unknown case !!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
@@ -386,7 +479,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                         file = file[_find + 1:]
                         CORVUS = temp.copy()
                         # new directory based dependecies ############ [UPDATE]
-                        idir = idir + 1  # $$$$$$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
+                        aimp = aimp + 1  # $$$$$$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
 
             # function name ----------------------------------------- [SECTION]
             elif file[0] == ' ':
@@ -399,14 +492,22 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     text = text.replace('}', '')
                     file = file[_find + 6:]
 
-                    if text.find(';') == -1:  # else error 3
+                    error = False
+                    for char in ('[', ']', '(', ')', ';', '~', '!', '@', '#',
+                                 '%', '^', '&', '*', '+', '?', '>', '<', '|',
+                                 '`'):
+                        if text.find(char) > -1:
+                            error = True
+
+                    if not error:  # else error 3
                         while(text.find(',') != -1):  # removing commas
                             _comma = text.find(',')
                             f_name = f_name + [text[:_comma]]
                             text = text[_comma + 1:]
 
                         f_name = f_name + [text]
-                        temp = saveData('FUNC', f_name, CORVUS, ids, i, c)
+                        temp = saveData('FUNC', f_name, CORVUS, ids, i, c,
+                                        case)
 
                         if isinstance(temp, type(pd.Series())):
                             errorLog = errorLog.append(temp, ignore_index=True)
@@ -414,7 +515,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                         else:
                             CORVUS = temp.copy()
                             # new function call detected ############# [UPDATE]
-                            func = func + 1  # $$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
+                            afun = afun + 1  # $$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
                             if len(CORVUS.loc[ids[i], 'FUNC']) > streak:
                                 streak = len(CORVUS.loc[ids[i], 'FUNC'])
                                 # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ [DIAGNOSIS]
@@ -427,15 +528,14 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                             file = file[1:]
                             _find = file.find('\"')
                         else:
-                            text = ' from ' + file[:file.find(';') + 1]
-                            log = logError(4, ids[i], c, text)
+                            log = logError(4, ids[i], c, case)
                             log.name = len(errorLog)
                             errorLog = errorLog.append(log)
                             break
                             # no qoutes found after ' from ' !!!!!!! 4 [UPDATE]
 
                         text = directoryRoutine(file, _find, directory, ids[i],
-                                                c)
+                                                c, case)
 
                         if isinstance(text, type(pd.Series())):
                             text.name = len(errorLog)
@@ -443,7 +543,8 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                             break  # zero length !!!!!!!!!!!!!!!!!!! 0 [UPDATE]
                             # illegal characters in directory !!!!!! 5 [UPDATE]
                         else:
-                            temp = saveData('DIR', text, CORVUS, ids, i, c)
+                            temp = saveData('DIR', text, CORVUS, ids, i, c,
+                                            case)
                             if isinstance(temp, type(pd.Series())):
                                 temp.name = len(errorLog)
                                 errorLog = errorLog.append(temp)
@@ -454,7 +555,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                                 file = file[_find + 1:]
                                 CORVUS = temp.copy()
                                 # new directory based dependecies #### [UPDATE]
-                                fdir = fdir + 1  # $$$$$$$$$$$$$$$$ [DIAGNOSIS]
+                                afrm = afrm + 1  # $$$$$$$$$$$$$$$$ [DIAGNOSIS]
                     else:
                         # log = logError(3, ids[i], c, text)
                         log = logError(3, ids[i], c, case)
@@ -483,14 +584,15 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
             file = file[file.find('require(\'') + 9:]
             _find = file.find('\')')
 
-            temp = directoryRoutine(file, _find, directory, ids[i], c)
+            temp = directoryRoutine(file, _find, directory, ids[i], c, case)
 
             if isinstance(temp, type(pd.Series())):
                 errorLog = errorLog.append(temp, ingore_index=True)
                 break  # zero length !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0 [UPDATE]
                 # illegal characters in directory !!!!!!!!!!!!!!!!!! 5 [UPDATE]
             else:
-                temp = saveData('DIR', temp, CORVUS, ids, i, c, mode='cond')
+                temp = saveData('DIR', temp, CORVUS, ids, i, c, case,
+                                mode='cond')
                 if isinstance(temp, type(pd.Series())):
                     errorLog = errorLog.append(temp, ignore_index=True)
                     break  # unknown case !!!!!!!!!!!!!!!!!!!!!!!!!! 6 [UPDATE]
@@ -498,7 +600,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                 # typo in directory string or file does not exist !! 8 [UPDATE]
                 else:
                     # CORVUS = temp.copy()
-                    ireq = ireq + 1
+                    cimp = cimp + 1
                     # new directory based dependecy ################## [UPDATE]
 
             # require import function ------------------------------- [SECTION]
@@ -518,7 +620,7 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                     # print '     {}'.format(text)
 
                     f_name = f_name + [text]
-                    temp = saveData('FUNC', f_name, CORVUS, ids, i, c,
+                    temp = saveData('FUNC', f_name, CORVUS, ids, i, c, case,
                                     mode='cond')
 
                     if isinstance(temp, type(pd.Series())):
@@ -526,19 +628,18 @@ def searchCorvus(ROOT, CORVUS, MIN_CHARS, CLEAN=True):
                         break  # duplicate entry !!!!!!!!!!!!!!!!!!! 9 [UPDATE]
                     else:
                         # CORVUS = temp.copy()
-                        freq = freq + 1
+                        cfun = cfun + 1
+                        cimp = cimp - 1
+                        cfrm = cfrm + 1
                         # new function call detected ################# [UPDATE]
                 else:
+                    print 'Syntax: I[{:03}] |{}'.format(c, case)
                     print '\tD[{:03}] |{}'.format(ids[i], directory)
-                    print '\tI[{:03}] |{}'.format(c, case)
                     drawLine()
             else:
                 pass  # !!! func not detected with import
 
-    print '\t> dircs', ireq
-    print '\t> funcs', freq
-    drawLine()
-    report = [idir, fdir, func, streak]
+    report = [aimp, cimp, afrm, cfrm, afun, cfun, streak]
     dirs = CORVUS.DIR.values
     dirs = pd.Series(range(len(dirs)), index=dirs)
     return CORVUS, dirs, errorLog, report
@@ -571,10 +672,13 @@ def showReport(CORVUS, DIRS, LOG, REPORT, DESC, PARTS=[False, True, True]):
     # overall report stats
     if PARTS[1]:
         print '\t> overall stats:'
-        print '\t  successful \'import\' method:  {:4}'.format(REPORT[0])
-        print '\t  successful  \'from\'  method:  {:4}'.format(REPORT[1])
-        print '\t  successful function import:  {:4}\n'.format(REPORT[2])
-        print '\t  function maximum streak:     {:4}\n'.format(REPORT[3])
+        print '\t  successful \'import\' :        {:4} |{:4}'.format(REPORT[0],
+                                                                     REPORT[1])
+        print '\t  successful  \'from\'  :        {:4} |{:4}'.format(REPORT[2],
+                                                                     REPORT[3])
+        print '\t  successful function:         {:4} |{:4}'.format(REPORT[4],
+                                                                   REPORT[5])
+        print '\t  function maximum streak:     {:4}\n'.format(REPORT[6])
         print '\t  files with dependencies:     {:4}'.format(len(dep))
         print '\t  files with only dependencies:{:4}'.format(len(only_dep))
         print '\t  files with no dependencies:  {:4}\n'.format(len(no_dep))
@@ -636,7 +740,7 @@ def getLine(ID, LOG, DIRS, ROOT):
         return 'NOT FOUND!'
 
 
-def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[], ISSUES=True):
+def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[8, -1], ISSUES=True):
     file = open('logs/errors.txt', 'w')
     for _type in LOG.E.unique():
         if _type not in IGNORE:
@@ -649,16 +753,34 @@ def exportErrors(ROOT, DIRS, LOG, DESC, IGNORE=[], ISSUES=True):
             for ID in temp.index:
                 _id = temp.ID[ID]
 
-                line = getLine(ID, LOG, DIRS, ROOT).replace('\n\n', '\n')
+                if _type in (0, 1, 2, 3, 4, 5, 7, 8):
+                    line = temp.TEXT[ID].replace('\n\n', '\n')
+                elif _type == -1:
+                    line = getLine(ID, LOG, DIRS, ROOT).replace('\n\n', '\n')
+                else:  # 6 or 9
+                    line = temp.TEXT[ID][1].replace('\n\n', '\n')
+
                 if line[0] == '\n':
                     line = line[1:]
                 line = line.replace('\n', '\n        |')
 
                 file.write(' D[{:03}] |{}\n'.format(_id, decodeID(_id, DIRS)))
-                file.write(' E[{:03}] |{}\n'.format(ID, line))
-                file.write(' I[{:03}] |\n'.format(temp.INS[ID]))
-                if _type in (7, 9):
-                    file.write(' *{}\n'.format(temp.TEXT[ID]))
+                file.write(' I[{:03}] |{}\n'.format(temp.INS[ID], line))
+                file.write(' E[{:03}] |'.format(ID))
+
+                if _type == 9:
+                    file.write('{}\n'.format(temp.TEXT[ID][0]))
+                    dups = '{}'.format(temp.TEXT[ID][2])
+                    dups = dups.replace('[', '').replace(']', '')
+                    dups = dups.replace(', \'', '\n        |')
+                    dups = dups.replace('\'', '')
+                    file.write('        |{}\n'.format(dups))
+                elif _type == 6:
+                    file.write('{}\n'.format(temp.TEXT[ID][0]))
+                    file.write('        |{}\n'.format(temp.TEXT[ID][2]))
+                else:
+                    file.write('\n')
+
                 file.write('-------------------------------------------------')
                 file.write('--------------\n')
     file.close()

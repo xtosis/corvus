@@ -2,26 +2,25 @@
 ### ERROR[ 9]: WARNING: duplicate entries attempted
 ###############################################################
  D[002] |/server/main.js
- E[000] |import '/imports/startup/both';
- I[009] |
- */imports/startup/both
+ I[009] |import '/imports/startup/both';
+ E[000] |DEP
+        |/imports/startup/both/routes.js
 ---------------------------------------------------------------
  D[238] |/imports/ui/templates/layout/navigation/navigation.js
- E[001] |import { timers } from '/lib/const';
- I[009] |
- */lib/const
+ I[009] |import { timers } from '/lib/const';
+ E[001] |DEP
+        |/lib/const.js
 ---------------------------------------------------------------
 ###############################################################
-### ERROR[ 8]: possible typo or file does not exist
+### ERROR[ 6]: Unexpected error! please investigate!
 ###############################################################
- D[240] |/imports/ui/templates/layout/menu/touchmenu.js
- E[002] |import './touchmenu.html';
- I[003] |
+ D[411] |/features/step_definitions/tags-steps.js
+ I[002] |require('/imports/api/tags/Tags').Tags.findOne({text: title});
+ E[004] |2
+        |/imports/api/tags/Tags
 ---------------------------------------------------------------
-###############################################################
-### ERROR[-1]: file too short
-###############################################################
- D[356] |/imports/startup/server/server-render.js
- E[003] |EMPTY
- I[000] |
+ D[420] |/features/step_definitions/support/models/ideas.js
+ I[002] |require('/imports/api/contracts/Contracts').Contracts.findOne(query);
+ E[005] |2
+        |/imports/api/contracts/Contracts
 ---------------------------------------------------------------
